@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <VuforiaUnityInfo version="7.0">
     <TargetSet version="5.0" toolVersion="2.7.4">
+        <CylinderTarget name="BigBeaker" version="3.0" targetId="aaee67d1cbd84da8923bb320eb6c47df" sideLength="0.250000" topDiameter="0.573000" bottomDiameter="0.573000" sideImage="BigBeaker.Body_scaled.jpg"/>
+        <CylinderTarget name="GasTube" version="3.0" targetId="07c1d45cd4b1494f98f3670ee8a3ba37" sideLength="0.500000" topDiameter="0.071600" bottomDiameter="0.071600" sideImage="GasTube.Body_scaled.jpg"/>
+        <CylinderTarget name="Burner" version="3.0" targetId="3eacfa0b004a47e2af1375490be24a6d" sideLength="0.400100" topDiameter="0.780000" bottomDiameter="0.580000" sideImage="Burner.Body_scaled.jpg"/>
         <CylinderTarget name="Beaker" version="3.0" targetId="8214dfbff88749cab8ea7dbcec7131b6" sideLength="0.940000" topDiameter="0.700000" bottomDiameter="0.700000" sideImage="Beaker.Body_scaled.jpg"/>
         <CylinderTarget name="SmallBeaker" version="3.0" targetId="e6caf5dffa634d50b1c03de6f104be44" sideLength="0.330000" topDiameter="0.455200" bottomDiameter="0.455200" sideImage="SmallBeaker.Body_scaled.jpg"/>
-        <CylinderTarget name="BigBeaker" version="3.0" targetId="aaee67d1cbd84da8923bb320eb6c47df" sideLength="0.250000" topDiameter="0.573000" bottomDiameter="0.573000" sideImage="BigBeaker.Body_scaled.jpg"/>
     </TargetSet>
 </VuforiaUnityInfo>
