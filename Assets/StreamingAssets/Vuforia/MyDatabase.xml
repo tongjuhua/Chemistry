@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <CylinderTarget name="Beaker" sideLength="0.940000"/>
+    <CylinderTarget name="SmallBeaker" sideLength="0.330000"/>
+    <CylinderTarget name="BigBeaker" sideLength="0.250000"/>
+  </Tracking>
+</QCARConfig>
