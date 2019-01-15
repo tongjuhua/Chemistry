@@ -250,7 +250,8 @@ public class Sensor : MonoBehaviour {
             // globalAccu = this.transform.rotation * new Vector3((float)a[0], (float)a[1], (float)a[2]);
             globalAccu = this.transform.rotation * new Vector3((float)a[1], (float)a[2], -(float)a[0]);
             //globalAccu = new Vector3((float)a[0], (float)a[1], (float)a[2]);
-            accuPreNum += globalAccu;
+            //accuPreNum += globalAccu;
+            accuPreNum += new Vector3((float)a[0], (float)a[1], (float)a[2] - 1);
             preCount--;
         }
         else if (preCount == 0) {
@@ -260,15 +261,17 @@ public class Sensor : MonoBehaviour {
             Debug.Log("Finished");
         }
         else {
-            //globalAccu = this.transform.rotation * new Vector3((float)a[0], (float)a[1], (float)a[2]);
-            globalAccu = this.transform.rotation * new Vector3((float)a[1], (float)a[2], -(float)a[0]);
-
-            velocity.x += (float)((Mathf.Abs(globalAccu.x - (float)averStart.x) > ignoreThreshold) ?
-                ((globalAccu.x - (float)averStart.x) * TimeElapse) : 0);
-            velocity.y += (float)((Mathf.Abs(globalAccu.y - (float)averStart.y) > ignoreThreshold) ?
-                ((globalAccu.y - (float)averStart.y) * TimeElapse) : 0);
-            velocity.z += (float)((Mathf.Abs(globalAccu.z - (float)averStart.z) > ignoreThreshold) ?
-                ((globalAccu.z - (float)averStart.z) * TimeElapse) : 0);
+            globalAccu = this.transform.rotation * new Vector3((float)a[0], (float)a[1], (float)a[2]);
+            //Vector3 atmp = new Vector3((float)a[0], (float)a[1], (float)a[2]) - averStart;
+            //globalAccu = this.transform.rotation * new Vector3(atmp.y, atmp.z, -atmp.x);
+            //globalAccu = this.transform.rotation * new Vector3((float)a[1], (float)a[2], -(float)a[0]);
+            //velocity.x += (float)((Mathf.Abs(globalAccu.x - (float)averStart.x) > ignoreThreshold) ?
+            //    ((globalAccu.x - (float)averStart.x) * TimeElapse) : 0);
+            //velocity.y += (float)((Mathf.Abs(globalAccu.y - (float)averStart.y) > ignoreThreshold) ?
+            //    ((globalAccu.y - (float)averStart.y) * TimeElapse) : 0);
+            //velocity.z += (float)((Mathf.Abs(globalAccu.z - (float)averStart.z) > ignoreThreshold) ?
+            //    ((globalAccu.z - (float)averStart.z) * TimeElapse) : 0);
+            velocity += globalAccu - Vector3.up;
             this.transform.position += this.transform.rotation
                 * new Vector3(
                 (float)velocity.x * (float)TimeElapse / posTransformer,
