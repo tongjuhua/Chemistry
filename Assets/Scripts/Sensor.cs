@@ -6,32 +6,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Sensor : MonoBehaviour
-{
+public class Sensor : MonoBehaviour {
 
     public string portname = "5";
     public int preCount = 200;
     public double ignoreThreshold = 0.01;
-    public float posTransformer = 10;
+    public float posTransformer = 100;
+
+    public Vector3 velocity;
+
     private int baudRate = 115200;
-    private double[] accuPreNum;
-    private double[] averStart;
-    private double[] velocity;
+    public Vector3 accuPreNum;
+    public Vector3 averStart;
 
 
     SerialPort sp = null;
 
-    private void Start()
-    {
+    private void Start() {
 
-        foreach (var item in SerialPort.GetPortNames())
-        {
+        foreach (var item in SerialPort.GetPortNames()) {
             Debug.Log(item);
         }
 
-        accuPreNum = new double[3]{ 0, 0, 0 };
-        averStart = new double[3] { 0, 0, 0 };
-        velocity = new double[3] { 0, 0, 0 };
 
         OpenPort();
         //InvokeRepeating("GetNumOfData", 0.02f, 0.02f);
@@ -40,29 +36,23 @@ public class Sensor : MonoBehaviour
     }
 
 
-    private void OpenPort()
-    {
+    private void OpenPort() {
         sp = new SerialPort(@"\\.\COM" + portname, baudRate);
         sp.ReadTimeout = 400;
-        try
-        {
+        try {
             sp.Open();
         }
-        catch (System.Exception ex)
-        {
+        catch (System.Exception ex) {
             Debug.Log(ex.Message);
         }
     }
 
 
-    private void ClosePort()
-    {
-        try
-        {
+    private void ClosePort() {
+        try {
             sp.Close();
         }
-        catch (System.Exception ex)
-        {
+        catch (System.Exception ex) {
             Debug.Log(ex.Message);
         }
     }
@@ -83,17 +73,17 @@ public class Sensor : MonoBehaviour
     private Int32 Baund = 115200;
     double TimeElapse = 0;
     private int srcCount;
-    private void DecodeData(byte[] byteTemp)
-    {
+    private void DecodeData(byte[] byteTemp) {
         double[] Data = new double[4];
-        TimeElapse = (DateTime.Now - TimeStart).TotalMilliseconds / 1000;
+        DateTime now = DateTime.Now;
+        TimeElapse = (now - TimeStart).TotalMilliseconds / 1000;
+        TimeStart = now;
         Data[0] = BitConverter.ToInt16(byteTemp, 2);
         Data[1] = BitConverter.ToInt16(byteTemp, 4);
         Data[2] = BitConverter.ToInt16(byteTemp, 6);
         Data[3] = BitConverter.ToInt16(byteTemp, 8);
         sRightPack++;
-        switch (byteTemp[1])
-        {
+        switch (byteTemp[1]) {
             case 0x50:
                 //Data[3] = Data[3] / 32768 * double.Parse(textBox9.Text) + double.Parse(textBox8.Text);
                 ChipTime[0] = (short)(2000 + byteTemp[2]);
@@ -223,12 +213,11 @@ public class Sensor : MonoBehaviour
         new int[4]{ 3, 1, 0, 2},
         new int[4]{ 3, 2, 1, 0},
         new int[4]{ 3, 2, 0, 1}};
-    void Update()
-    {
+    void Update() {
         //MoveObj();
 
 
-        if (Input.GetKeyDown(KeyCode.Q)){
+        if (Input.GetKeyDown(KeyCode.Q)) {
             iaef++;
             Debug.Log(iaef);
         }
@@ -238,8 +227,10 @@ public class Sensor : MonoBehaviour
         }
     }
 
-    private void MoveObj()
-    {
+    public Vector3 globalAccu;
+    public Vector3 globalRotation;
+
+    private void MoveObj() {
         //this.transform.rotation = Quaternion.Euler((float)Angle[0] + 38.661f, -(float)Angle[2] + 31.16499f, (float)Angle[1] - 99.069f);
         //Debug.Log((float)Angle[0] + " " + (float)Angle[1] + " " + (float)Angle[2]);
         //Debug.Log(Angle[0] + " " + Angle[1] + " " + Angle[2]);
@@ -249,109 +240,102 @@ public class Sensor : MonoBehaviour
         //    , (float)q[data[iaef][2]]
         //    , (float)q[data[iaef][3]]);
         this.transform.localRotation = new Quaternion((float)q[1], (float)q[0], (float)q[2], (float)q[3]);
+        //this.transform.localRotation = new Quaternion((float)q[0], -(float)q[1], (float)q[2], (float)q[3]);
+        globalRotation = this.transform.rotation.eulerAngles;
 
-
-
-        if (preCount > 100)
-        {
+        if (preCount > 100) {
             preCount--;
         }
-        else if(preCount > 0)
-        {
-            accuPreNum[0] += a[0];
-            accuPreNum[1] += a[1];
-            accuPreNum[2] += a[2];
+        else if (preCount > 0) {
+            // globalAccu = this.transform.rotation * new Vector3((float)a[0], (float)a[1], (float)a[2]);
+            globalAccu = this.transform.rotation * new Vector3((float)a[1], (float)a[2], -(float)a[0]);
+            //globalAccu = new Vector3((float)a[0], (float)a[1], (float)a[2]);
+            accuPreNum += globalAccu;
             preCount--;
         }
-        else if (preCount == 0)
-        {
-            averStart[0] = accuPreNum[0] / (double)(srcCount - 100);
-            averStart[1] = accuPreNum[1] / (double)(srcCount - 100);
-            averStart[2] = accuPreNum[2] / (double)(srcCount - 100);
+        else if (preCount == 0) {
+            averStart = accuPreNum / (float)(srcCount - 100);
+
             preCount--;
             Debug.Log("Finished");
         }
-        else
-        {
-            velocity[0] = (Mathf.Abs((float)a[0] - (float)averStart[0]) > ignoreThreshold) ?
-                (velocity[0] + (a[0] - (float)averStart[0]) * TimeElapse) : 0;
-            velocity[1] = (Mathf.Abs((float)a[1] - (float)averStart[1]) > ignoreThreshold) ?
-                (velocity[1] + (a[1] - (float)averStart[1]) * TimeElapse) : 0;
-            velocity[2] = (Mathf.Abs((float)a[2] - (float)averStart[2]) > ignoreThreshold) ?
-                (velocity[2] + (a[2] - (float)averStart[2]) * TimeElapse) : 0;
-            //this.transform.position += Quaternion.AngleAxis(this.transform.rotation.x, Vector3.right) * 
-            //    Quaternion.AngleAxis(this.transform.rotation.y, Vector3.up) * 
-            //    Quaternion.AngleAxis(this.transform.rotation.z, Vector3.forward)
-            //    * new Vector3(
-            //    (float)velocity[0] * (float)TimeElapse / posTransformer,
-            //    (float)velocity[1] * (float)TimeElapse / posTransformer,
-            //    (float)velocity[2] * (float)TimeElapse / posTransformer);
-            //Debug.Log(this.transform.position);
-            //Debug.Log(velocity[2] + " a " + a[2] + " aver " + averStart[2]);
-            //Debug.Log(ChipTime[0] + ChipTime[1] + ChipTime[6]);
+        else {
+            //globalAccu = this.transform.rotation * new Vector3((float)a[0], (float)a[1], (float)a[2]);
+            globalAccu = this.transform.rotation * new Vector3((float)a[1], (float)a[2], -(float)a[0]);
+
+            velocity.x += (float)((Mathf.Abs(globalAccu.x - (float)averStart.x) > ignoreThreshold) ?
+                ((globalAccu.x - (float)averStart.x) * TimeElapse) : 0);
+            velocity.y += (float)((Mathf.Abs(globalAccu.y - (float)averStart.y) > ignoreThreshold) ?
+                ((globalAccu.y - (float)averStart.y) * TimeElapse) : 0);
+            velocity.z += (float)((Mathf.Abs(globalAccu.z - (float)averStart.z) > ignoreThreshold) ?
+                ((globalAccu.z - (float)averStart.z) * TimeElapse) : 0);
+            this.transform.position += this.transform.rotation
+                * new Vector3(
+                (float)velocity.x * (float)TimeElapse / posTransformer,
+                (float)velocity.y * (float)TimeElapse / posTransformer,
+                (float)velocity.z * (float)TimeElapse / posTransformer);
+            
         }
-        
+
     }
 
     UInt16 index = 0;
-    private IEnumerator GetNumOfData()
-    {
+    private IEnumerator GetNumOfData() {
         while (true) {
             UInt16 usLength = 0;
             byte[] byteTemp = new byte[11];
             if (sp != null && sp.IsOpen) {
                 //try {
-                    usLength = (UInt16)sp.Read(RxBuffer, index, 700);
-                    index = 0;
-                    while ((usLength - index) > 11) {
-                        //RxBuffer.CopyTo(byteTemp, index);
-                        for (int i = index; i < index + 11; i++)
-                            byteTemp[i - index] = RxBuffer[i];
-                        if (!((byteTemp[0] == 0x55) & ((byteTemp[1] & 0x50) == 0x50))) {
-                            index++;
-                            continue;
-                        }
-                        if (((byteTemp[0] + byteTemp[1] + byteTemp[2] + byteTemp[3] + byteTemp[4] + byteTemp[5] + byteTemp[6] + byteTemp[7] + byteTemp[8] + byteTemp[9]) & 0xff) == byteTemp[10])
-                            DecodeData(byteTemp);
-                        index += 11;
-                        //Debug.Log
+                usLength = (UInt16)sp.Read(RxBuffer, index, 700);
+                index = 0;
+                while ((usLength - index) > 11) {
+                    //RxBuffer.CopyTo(byteTemp, index);
+                    for (int i = index; i < index + 11; i++)
+                        byteTemp[i - index] = RxBuffer[i];
+                    if (!((byteTemp[0] == 0x55) & ((byteTemp[1] & 0x50) == 0x50))) {
+                        index++;
+                        continue;
                     }
-                    for (int i = index; i < usLength; i++)
-                        RxBuffer[i - index] = RxBuffer[i];
-                    //Debug.Log(index + " " + usLength);
-                    index = (UInt16)(usLength - index);
-
-
-                    //    usLength = (UInt16)sp.Read(RxBuffer, usRxLength, 700);
-                    //    usRxLength += usLength;
-                    //    //print(sp.ReadByte());
-                    //    while (usRxLength >= 11) {
-                    //        //UpdateData Update = new UpdateData(DecodeData);
-                    //        RxBuffer.CopyTo(byteTemp, 0);
-                    //        if (!((byteTemp[0] == 0x55) & ((byteTemp[1] & 0x50) == 0x50))) {
-                    //            for (int i = 1; i < usRxLength; i++) RxBuffer[i - 1] = RxBuffer[i];
-                    //            usRxLength--;
-                    //            continue;
-                    //        }
-                    //        if (((byteTemp[0] + byteTemp[1] + byteTemp[2] + byteTemp[3] + byteTemp[4] + byteTemp[5] + byteTemp[6] + byteTemp[7] + byteTemp[8] + byteTemp[9]) & 0xff) == byteTemp[10])
-                    //            //this.Control.Invoke(Update, byteTemp);
-                    //            //this.Invoke("")
-                    //            DecodeData(byteTemp);
-                    //        for (int i = 11; i < usRxLength; i++) RxBuffer[i - 11] = RxBuffer[i];
-                    //        usRxLength -= 11;
-                    //    }
-                    //}
-                    //catch (System.Exception ex) {
-
-                    //    Debug.Log(ex.Message);
-                    //}
+                    if (((byteTemp[0] + byteTemp[1] + byteTemp[2] + byteTemp[3] + byteTemp[4] + byteTemp[5] + byteTemp[6] + byteTemp[7] + byteTemp[8] + byteTemp[9]) & 0xff) == byteTemp[10])
+                        DecodeData(byteTemp);
+                    index += 11;
+                    //Debug.Log
                 }
+                for (int i = index; i < usLength; i++)
+                    RxBuffer[i - index] = RxBuffer[i];
+                //Debug.Log(index + " " + usLength);
+                index = (UInt16)(usLength - index);
+
+
+                //    usLength = (UInt16)sp.Read(RxBuffer, usRxLength, 700);
+                //    usRxLength += usLength;
+                //    //print(sp.ReadByte());
+                //    while (usRxLength >= 11) {
+                //        //UpdateData Update = new UpdateData(DecodeData);
+                //        RxBuffer.CopyTo(byteTemp, 0);
+                //        if (!((byteTemp[0] == 0x55) & ((byteTemp[1] & 0x50) == 0x50))) {
+                //            for (int i = 1; i < usRxLength; i++) RxBuffer[i - 1] = RxBuffer[i];
+                //            usRxLength--;
+                //            continue;
+                //        }
+                //        if (((byteTemp[0] + byteTemp[1] + byteTemp[2] + byteTemp[3] + byteTemp[4] + byteTemp[5] + byteTemp[6] + byteTemp[7] + byteTemp[8] + byteTemp[9]) & 0xff) == byteTemp[10])
+                //            //this.Control.Invoke(Update, byteTemp);
+                //            //this.Invoke("")
+                //            DecodeData(byteTemp);
+                //        for (int i = 11; i < usRxLength; i++) RxBuffer[i - 11] = RxBuffer[i];
+                //        usRxLength -= 11;
+                //    }
+                //}
+                //catch (System.Exception ex) {
+
+                //    Debug.Log(ex.Message);
+                //}
+            }
             yield return new WaitForSeconds(0.02f);
         }
     }
 
-    private void OnDisable()
-    {
+    private void OnDisable() {
         print("OnDisable");
         ClosePort();
     }
