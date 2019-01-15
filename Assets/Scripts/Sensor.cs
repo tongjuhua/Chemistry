@@ -18,12 +18,12 @@ public class Sensor : MonoBehaviour {
     private int baudRate = 115200;
     public Vector3 accuPreNum;
     public Vector3 averStart;
-
+    public GameObject bottle;
 
     SerialPort sp = null;
 
     private void Start() {
-
+        this.transform.position = bottle.transform.position;
         foreach (var item in SerialPort.GetPortNames()) {
             Debug.Log(item);
         }
@@ -272,12 +272,12 @@ public class Sensor : MonoBehaviour {
             //velocity.z += (float)((Mathf.Abs(globalAccu.z - (float)averStart.z) > ignoreThreshold) ?
             //    ((globalAccu.z - (float)averStart.z) * TimeElapse) : 0);
             velocity += globalAccu - Vector3.up;
-            this.transform.position += this.transform.rotation
-                * new Vector3(
-                (float)velocity.x * (float)TimeElapse / posTransformer,
-                (float)velocity.y * (float)TimeElapse / posTransformer,
-                (float)velocity.z * (float)TimeElapse / posTransformer);
-            
+            //this.transform.position += this.transform.rotation
+            //    * new Vector3(
+            //    (float)velocity.x * (float)TimeElapse / posTransformer,
+            //    (float)velocity.y * (float)TimeElapse / posTransformer,
+            //    (float)velocity.z * (float)TimeElapse / posTransformer);
+            //this.transform.position = bottle.transform.position;
         }
 
     }
