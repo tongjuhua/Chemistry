@@ -12,6 +12,8 @@
         public Obi.ObiEmitter bottleEmitter;
         public GameObject Cube;
 
+
+
         public static void Connect(AirTransmit airFrom, AirTransmit airTo)
         {
             if (!airFrom || !airTo)
@@ -91,12 +93,16 @@
                 if (emitter)
                     emitter.speed = amount*0.1f;
                 TipBoard.Progress(0, 2);
+
             }
         }
 
         // Use this for initialization
         void Start()
         {
+            if (emitter!= null || bottleEmitter != null) {
+                Debug.Log("AirTransmit: has emitter: " + this.name);
+            }
             if (next)
             {
                 end = next;

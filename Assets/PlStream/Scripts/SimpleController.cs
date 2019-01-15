@@ -8,11 +8,12 @@ public class SimpleController : MonoBehaviour {
     //public Text divisor_value;
     //public Slider sensors_slider;
     //public Text sensors_value;
-    private float divisorSliderValue = 1.0f;
+    public float divisorSliderValue = 1.0f;
     private float sensorsSliderValue = 1;
     
     private PlStream plstream;
     private Vector3 prime_position;
+    public Vector3 posOffset;
     //private GameObject[] knuckles;
 
     //private int[] dropped;
@@ -64,21 +65,27 @@ public class SimpleController : MonoBehaviour {
 
                 // doing crude (90 degree) rotations into frame
                 Vector3 unity_position;
-                unity_position.x = pol_position.y;
-                unity_position.y = -pol_position.z;
-                unity_position.z = pol_position.x;
-
+                //unity_position.x = pol_position.y;
+                //unity_position.y = -pol_position.z;
+                //unity_position.z = pol_position.x;
+                unity_position.x = -pol_position.x;
+                unity_position.y = -pol_position.y;
+                unity_position.z = -pol_position.z;
 
                 Quaternion unity_rotation;
                 unity_rotation.w = pol_rotation[0];
-                unity_rotation.x = -pol_rotation[2];
-                unity_rotation.y = pol_rotation[3];
-                unity_rotation.z = -pol_rotation[1];
+                unity_rotation.x = pol_rotation[1];
+                unity_rotation.y = pol_rotation[2];
+                unity_rotation.z = pol_rotation[3];
+                //unity_rotation.w = pol_rotation[0];
+                //unity_rotation.x = -pol_rotation[2];
+                //unity_rotation.y = pol_rotation[3];
+                //unity_rotation.z = -pol_rotation[1];
                 //unity_rotation = Quaternion.Inverse(unity_rotation);
 
                 //if (!knuckles[i].activeSelf)
                 //    knuckles[i].SetActive(true);
-                this.transform.position = unity_position / divisorSliderValue;
+                this.transform.position = unity_position / divisorSliderValue + posOffset;
                 this.transform.rotation = unity_rotation;
 
                 // set deactivate frame count to 10
